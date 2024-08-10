@@ -10,15 +10,15 @@ public static class Program
         uint nameTablePosition = 0;
         uint fileValue = 0;
         uint fileContentOffset = 0;
-        uint fileLength = 0;
+        uint fileContentLength = 0;
         string readFileValue;
 
         // :3
 
 
-        if (File.Exists("D:\\Skylander Mods\\SSA Files\\DATA\\files\\character\\010_FlameKnight.arc"))
+        if (File.Exists("C:/Users/aivazquez/VisualStudioProjects/C# Projects/IgnitorStuff/010_FlameKnight.arc"))
         {
-            using (var stream = File.Open("D:\\Skylander Mods\\SSA Files\\DATA\\files\\character\\010_FlameKnight.arc", FileMode.Open))
+            using (var stream = File.Open("C:/Users/aivazquez/VisualStudioProjects/C# Projects/IgnitorStuff/010_FlameKnight.arc", FileMode.Open))
             {
 
                 // Reading the file names
@@ -30,7 +30,31 @@ public static class Program
                     reader.BaseStream.Position = 0x18;
                     nameTablePosition = reader.ReadUInt32();
 
-                    for (int fileNum = 0; fileNum < numOfFiles; fileNum++)
+                    
+
+                    for (int currentFile = 0; currentFile < numOfFiles; currentFile++)
+                    {
+                        reader.BaseStream.Position = 0x30 + numOfFiles * 4 + currentFile * 12;
+                        fileContentOffset = reader.ReadUInt32();
+ 
+                        fileContentLength = reader.ReadUInt32();
+
+
+                        reader.BaseStream.Position = fileContentOffset;
+                        byte[] fileBytes = new byte[fileContentLength];
+                        reader.Read(fileBytes);
+                        Console.WriteLine(fileContentLength);
+
+                        FileStream extractedFile = File.Create("C:/Users/aivazquez/VisualStudioProjects/C# Projects/IgnitorStuff/ExtractedFiles/file.extension");
+                          
+                        extractedFile.Write(fileBytes);
+                        extractedFile.Close();
+
+                        fileContentOffset = fileContentOffset + 12;
+                            
+                    }
+
+                   /* for (int fileNum = 0; fileNum < numOfFiles; fileNum++)
                     {
                         reader.BaseStream.Position = nameTablePosition + fileNum * 4;
                         fileValue = reader.ReadUInt32();
@@ -40,29 +64,10 @@ public static class Program
                         Console.WriteLine(readFileValue);
 
 
-                        // Extracting files from the arc file
+                    }*/
+                       
+                    // Extracting files from the arc file
 
-                        reader.BaseStream.Position = 0x30 + numOfFiles * 4;
-                        fileContentOffset = reader.ReadUInt32();
-
-                        for (int i = 0; i < numOfFiles; i++)
-                        {
-
-                            fileLength = fileLength + 12;
-                            fileLength = reader.ReadUInt32();
-
-                            FileStream extractedFile = File.Create("C:\\Users\\aivazquez\\VisualStudioProjects\\C# Projects\\IgnitorStuff\\ExtractedFiles\\file.extension");
-
-                            Console.WriteLine(fileLength);
-                            byte[] fileBytes = new byte[fileLength];
-                            reader.BaseStream.Position = fileContentOffset;
-                            reader.Read(fileBytes);
-
-                            extractedFile.Write(fileBytes);
-                            extractedFile.Close();
-                            
-                        }
-                    }
                 }
             }
         }   
